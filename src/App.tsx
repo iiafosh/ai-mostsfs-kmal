@@ -15,12 +15,28 @@ import {
   Monitor,
   BookOpen
 } from 'lucide-react';
-import { clsx, type ClassValue } from 'clsx';
+import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
-function cn(...inputs: ClassValue[]) {
+// Safe environment variable access - avoiding direct 'process' access where possible
+const getApiKey = () => {
+  try {
+    // Vite will replace the following expression with the actual key string
+    const key = process.env.GEMINI_API_KEY;
+    if (key && typeof key === 'string' && key !== 'undefined') return key;
+    
+    // Fallback to import.meta.env if available
+    return (import.meta as any).env?.VITE_GEMINI_API_KEY || '';
+  } catch {
+    return '';
+  }
+};
+
+function cn(...inputs: any[]) {
   return twMerge(clsx(inputs));
 }
+
+console.log("Afosh AI: System check initiated... Ready to crush code, ya handasa!");
 
 // --- Types ---
 
@@ -91,7 +107,11 @@ export default function App() {
     setIsLoading(true);
 
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+      const apiKey = getApiKey();
+      if (!apiKey) {
+        throw new Error("Missing API Key, ya handasa! Check your secrets.");
+      }
+      const ai = new GoogleGenAI({ apiKey });
       const chat = ai.chats.create({
         model: "gemini-3-flash-preview",
         config: {
