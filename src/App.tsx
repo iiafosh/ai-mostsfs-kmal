@@ -109,7 +109,11 @@ export default function App() {
     try {
       const apiKey = getApiKey();
       if (!apiKey) {
-        throw new Error("Missing API Key, ya handasa! Check your secrets.");
+        const isGitHubPages = window.location.hostname.includes('github.io');
+        const errorMsg = isGitHubPages 
+          ? "Ya basha, I'm running on GitHub Pages but I don't have my API Key! You need to configure GitHub Secrets or use the AI Studio preview to talk to me."
+          : "Missing API Key, ya handasa! Check your environment variables.";
+        throw new Error(errorMsg);
       }
       const ai = new GoogleGenAI({ apiKey });
       const chat = ai.chats.create({
@@ -119,9 +123,6 @@ export default function App() {
         },
       });
 
-      // Prepare history for context
-      // Note: In a real app, you'd pass the full history. 
-      // For this demo, we'll just send the current message.
       const response = await chat.sendMessage({ message: textToSend });
       
       const assistantMessage: Message = {
@@ -132,12 +133,14 @@ export default function App() {
       };
 
       setMessages(prev => [...prev, assistantMessage]);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error calling Gemini:", error);
+      const errorMessage = error.message || "Listen ya handasa, I hit a snag. Check your connection or maybe the API key is acting up.";
+      
       setMessages(prev => [...prev, {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: "Listen ya handasa, I hit a snag. Check your connection or maybe the API key is acting up. Let's try again!",
+        content: `${errorMessage} Let's try again!`,
         timestamp: new Date(),
       }]);
     } finally {

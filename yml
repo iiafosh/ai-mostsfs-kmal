@@ -26,6 +26,8 @@ jobs:
         run: |
           npm install
           npm run build
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }} # You must add this to your GitHub Repo Secrets!
       - name: Setup Pages
         uses: actions/configure-pages@v4
       - name: Upload artifact
